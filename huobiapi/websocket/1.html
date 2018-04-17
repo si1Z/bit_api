@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <title>WebSocket 客户端</title>
+    </head>
+
+    <body>
+        <div>
+            <input type="button" id="btnConnection" value="连接" />
+            <input type="button" id="btnSend" value="订阅" />
+            <input type="button" id="btnClose" value="关闭" />
+
+        </div>
+        <script src="http://libs.baidu.com/jquery/1.11.1/jquery.min.js"></script>
+        <script type="text/javascript">
+            var wsUri ="wss://api.huobipro.com/ws";
+            var websocket;
+            var output;
+
+            function init() {
+                output = document.getElementById("output");
+            }
+
+            var reader = new FileReader();
+            // var fileObjSlicString = reader.readAsBinaryString(fileObj.slice(fileStart,fileEnd));
+            // alert(fileObjSlicString);
+
+            //实现化WebSocket对象，指定要连接的服务器地址与端口
+            $("#btnConnection").click(function() {
+                websocket = new WebSocket(wsUri);
+                writeToScreen("CONNECTED");
+
+            });
+
+            //发送消息
+            $("#btnSend").click(function(evt) {
+                //打开事件
+                onOpen(evt);
+
+                websocket.onmessage = function(evt) {
+                    onMessage(evt)
+                };
+            });
+
+            //关闭
+            $("#btnClose").click(function(evt) {
+                websocket.close();
+                onClose(evt);
+            });
+
+
+
+            function onOpen(evt) {
+                doSend("{\"sub\": \"market.ethusdt.kline.1min\",\"id\": \"id10\"}");
+            }
+
+            function onMessage(evt) {
+                writeToScreen('<span style="color: blue;">RESPONSE: '+ evt.data+'</span>');
+                // reader.readAsBinaryString(evt.data);
+                // writeToScreen('<span style="color: blue;">RESPONSE: '+ reader.readAsBinaryString(evt.data)+'</span>')
+                // websocket.close();
+            }
+
+            function onClose(evt) {
+                writeToScreen("DISCONNECTED");
+            }
+
+
+
+            function onError(evt) {
+                writeToScreen('<span style="color: red;">ERROR:</span> '+ evt.data);
+            }
+
+            function doSend(message) {
+                writeToScreen("SENT: " + message);
+                websocket.send(message);
+            }
+
+            function writeToScreen(message) {
+                var pre = document.createElement("p");
+                pre.style.wordWrap = "break-word";
+                pre.innerHTML = message;
+                output.appendChild(pre);
+            }
+            window.addEventListener("load", init, false);
+        </script>
+    <h2>WebSocket Test</h2>
+    <div id="output"></div>
+    </body>
+
+</html>
